@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Define color codes for console output -->
+    <conversionRule conversionWord="clr" class="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" class="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+    <conversionRule conversionWord="wEx" class="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+
+    <!-- Simplified console pattern with custom colors -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%clr(%d{HH:mm:ss}){faint} %clr(%5p){red} %clr(%logger{30}){cyan} - %m%n"/>
+
+    <property name="FILE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} - %msg%n"/>
+
+    <!-- Console Appender with ANSI colors -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss} %highlight(%-5level){ERROR=red, WARN=magenta, INFO=blue, DEBUG=yellow} %cyan(%logger{30}) - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- File Appender for all logs -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/reactive-api.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/reactive-api.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Error File Appender - separate file for errors -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/reactive-api-errors.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/reactive-api-errors.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- JSON Appender for structured logging (optional) -->
+    <springProfile name="json">
+        <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>logs/reactive-api.json</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>logs/reactive-api.%d{yyyy-MM-dd}.json</fileNamePattern>
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+            <encoder class="ch.qos.logback.classic.encoder.JsonEncoder"/>
+        </appender>
+    </springProfile>
+
+    <!-- Your application logger -->
+    <logger name="com.loveable.app" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </logger>
+
+    <!-- Reduce Spring Boot noise -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.boot" level="WARN"/>
+    <logger name="org.springframework.data.r2dbc" level="WARN"/>
+
+    <!-- Root logger configuration -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+    <!-- Development profile - more verbose -->
+    <springProfile name="dev">
+        <logger name="com.loveable.app" level="DEBUG"/>
+        <logger name="org.springframework.data.r2dbc" level="DEBUG"/>
+        <logger name="io.r2dbc" level="DEBUG"/>
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+
+    <!-- Test profile - minimal logging -->
+    <springProfile name="test">
+        <root level="WARN">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>        <!--<?xml version="1.0" encoding="UTF-8"?>-->
+        <!--<configuration>-->
+        <!--    &lt;!&ndash; Define color codes for console output &ndash;&gt;-->
+        <!--    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />-->
+        <!--    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />-->
+        <!--    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />-->
+
+        <!--    &lt;!&ndash; Properties for customization &ndash;&gt;-->
+        <!--    <springProfile name="!prod">-->
+        <!--        <property name="CONSOLE_LOG_PATTERN"-->
+        <!--                  value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>-->
+        <!--        <property name="FILE_LOG_PATTERN"-->
+        <!--                  value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-50logger{50} - %msg%n"/>-->
+        <!--    </springProfile>-->
+
+        <!--    &lt;!&ndash; Production profile - more compact &ndash;&gt;-->
+        <!--    <springProfile name="prod">-->
+        <!--        <property name="CONSOLE_LOG_PATTERN"-->
+        <!--                  value="%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"/>-->
+        <!--        <property name="FILE_LOG_PATTERN"-->
+        <!--                  value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"/>-->
+        <!--    </springProfile>-->
+
+        <!--    &lt;!&ndash; Console Appender with beautiful formatting &ndash;&gt;-->
+        <!--    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
+        <!--        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">-->
+        <!--            <pattern>${CONSOLE_LOG_PATTERN}</pattern>-->
+        <!--            <charset>UTF-8</charset>-->
+        <!--        </encoder>-->
+        <!--    </appender>-->
+
+        <!--    &lt;!&ndash; File Appender for all logs &ndash;&gt;-->
+        <!--    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+        <!--        <file>logs/reactive-api.log</file>-->
+        <!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+        <!--            <fileNamePattern>logs/reactive-api.%d{yyyy-MM-dd}.%i.log</fileNamePattern>-->
+        <!--            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">-->
+        <!--                <maxFileSize>10MB</maxFileSize>-->
+        <!--            </timeBasedFileNamingAndTriggeringPolicy>-->
+        <!--            <maxHistory>30</maxHistory>-->
+        <!--            <totalSizeCap>1GB</totalSizeCap>-->
+        <!--        </rollingPolicy>-->
+        <!--        <encoder>-->
+        <!--            <pattern>${FILE_LOG_PATTERN}</pattern>-->
+        <!--            <charset>UTF-8</charset>-->
+        <!--        </encoder>-->
+        <!--    </appender>-->
+
+        <!--    &lt;!&ndash; Error File Appender - separate file for errors &ndash;&gt;-->
+        <!--    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+        <!--        <file>logs/reactive-api-errors.log</file>-->
+        <!--        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+        <!--            <level>ERROR</level>-->
+        <!--        </filter>-->
+        <!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+        <!--            <fileNamePattern>logs/reactive-api-errors.%d{yyyy-MM-dd}.%i.log</fileNamePattern>-->
+        <!--            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">-->
+        <!--                <maxFileSize>10MB</maxFileSize>-->
+        <!--            </timeBasedFileNamingAndTriggeringPolicy>-->
+        <!--            <maxHistory>60</maxHistory>-->
+        <!--        </rollingPolicy>-->
+        <!--        <encoder>-->
+        <!--            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>-->
+        <!--            <charset>UTF-8</charset>-->
+        <!--        </encoder>-->
+        <!--    </appender>-->
+
+        <!--    &lt;!&ndash; JSON Appender for structured logging (optional) &ndash;&gt;-->
+        <!--    <springProfile name="json">-->
+        <!--        <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+        <!--            <file>logs/reactive-api.json</file>-->
+        <!--            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+        <!--                <fileNamePattern>logs/reactive-api.%d{yyyy-MM-dd}.json</fileNamePattern>-->
+        <!--                <maxHistory>30</maxHistory>-->
+        <!--            </rollingPolicy>-->
+        <!--            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
+        <!--                <providers>-->
+        <!--                    <timestamp/>-->
+        <!--                    <logLevel/>-->
+        <!--                    <loggerName/>-->
+        <!--                    <message/>-->
+        <!--                    <mdc/>-->
+        <!--                    <stackTrace/>-->
+        <!--                </providers>-->
+        <!--            </encoder>-->
+        <!--        </appender>-->
+        <!--    </springProfile>-->
+
+        <!--    &lt;!&ndash; Specific logger configurations &ndash;&gt;-->
+        <!--    <logger name="com.loveable.app" level="INFO" additivity="false">-->
+        <!--        <appender-ref ref="CONSOLE"/>-->
+        <!--        <appender-ref ref="FILE"/>-->
+        <!--        <appender-ref ref="ERROR_FILE"/>-->
+        <!--    </logger>-->
+
+        <!--    &lt;!&ndash; Spring Boot specific loggers &ndash;&gt;-->
+        <!--    <logger name="org.springframework.boot" level="INFO"/>-->
+        <!--    <logger name="org.springframework.web" level="DEBUG"/>-->
+        <!--    <logger name="org.springframework.data.r2dbc" level="DEBUG"/>-->
+        <!--    <logger name="io.r2dbc.h2" level="DEBUG"/>-->
+
+        <!--    &lt;!&ndash; Reactor specific loggers &ndash;&gt;-->
+        <!--    <logger name="reactor.core" level="INFO"/>-->
+        <!--    <logger name="reactor.netty" level="INFO"/>-->
+
+        <!--    &lt;!&ndash; Database query logging &ndash;&gt;-->
+        <!--    <logger name="org.springframework.r2dbc" level="DEBUG"/>-->
+
+        <!--    &lt;!&ndash; Reduce noise from some frameworks &ndash;&gt;-->
+        <!--    <logger name="org.springframework.boot.actuate" level="WARN"/>-->
+        <!--    <logger name="org.springframework.boot.autoconfigure" level="INFO"/>-->
+
+        <!--    &lt;!&ndash; Root logger configuration &ndash;&gt;-->
+        <!--    <root level="INFO">-->
+        <!--        <appender-ref ref="CONSOLE"/>-->
+        <!--        <appender-ref ref="FILE"/>-->
+        <!--        <appender-ref ref="ERROR_FILE"/>-->
+        <!--    </root>-->
+
+        <!--    &lt;!&ndash; Development profile - more verbose &ndash;&gt;-->
+        <!--    <springProfile name="dev">-->
+        <!--        <logger name="com.loveable.app" level="DEBUG"/>-->
+        <!--        <logger name="org.springframework.data.r2dbc" level="DEBUG"/>-->
+        <!--        <logger name="io.r2dbc" level="DEBUG"/>-->
+        <!--        <root level="DEBUG">-->
+        <!--            <appender-ref ref="CONSOLE"/>-->
+        <!--            <appender-ref ref="FILE"/>-->
+        <!--        </root>-->
+        <!--    </springProfile>-->
+
+        <!--    &lt;!&ndash; Test profile - minimal logging &ndash;&gt;-->
+        <!--    <springProfile name="test">-->
+        <!--        <root level="WARN">-->
+        <!--            <appender-ref ref="CONSOLE"/>-->
+        <!--        </root>-->
+        <!--    </springProfile>-->
+
+        <!--</configuration>-->
+
